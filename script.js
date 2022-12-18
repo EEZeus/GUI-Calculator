@@ -1,21 +1,3 @@
-//class based calculator implement
-/*
-UI elements 
-
-1.number buttons
-2.operation buttons
-3.equals button
-4.delete button
-5.operands text element (if needed)
-
-methods:
-1.delete
-2.appendNumber
-3.chooseOperation
-4.compute
-5.update display
-
-*/
 class Calculator {
 
 
@@ -29,7 +11,7 @@ class Calculator {
     }
 
     delete() {
-        this.displayMessage = this.displayMessage.substring(0,this.displayMessage.length-1);
+        this.displayMessage = this.displayMessage.substring(0, this.displayMessage.length - 1);
         this.updateDisplay()
     }
 
@@ -38,69 +20,102 @@ class Calculator {
         this.updateDisplay()
     }
 
+    ParseToArray(displayMessage) {
+        let arr = []
+        let str = ''
+        for (let i = 0; i < displayMessage.length; i++) {
+            if (displayMessage[i] < '0' && displayMessage[i] != '.') {
+                if (str.length > 0)
+                    arr.push(str)
+                arr.push(displayMessage[i])
+                str = ''
+            } else {
+                str += displayMessage[i]
+            }
+            if (i === displayMessage.length - 1) {
+                arr.push(str)
+            }
+        }
+        return arr
+    }
     prec(c) {
-        if(c == 'sqrt')
+        if (c == 'sqrt')
             return 3;
-        else if(c == '/' || c=='.')
+        else if (c == '/' || c == '*' || c == '%')
             return 2;
-        else if(c == '+' || c == '-')
+        else if (c == '+' || c == '-')
             return 1;
         else
             return -1;
     }
+    isOperator(op) {
+        if (op == '+' || op == '-' ||
+            op == '%' || op == '*' ||
+            op == '/' || op == '(' ||
+            op == ')' || op == 'sqrt') {
+            return true;
+        }
+        else
+            return false;
+    }
+    infixToPostfix(infixArr) {
+        let postfixArr = []
+        let stack = []
+        for (let item of infixArr) {
+            if (!this.isOperator(item)) {
+                postfixArr.push(item)
+            } else if (item === '(') {
+                stack.push(item)
+            } else if (item === ')') {
+                while (stack[stack.length - 1] !== '(') {
+                    postfixArr.push(stack.pop())
+                }
+                stack.pop()
+            } else if (this.isOperator(item)) {
+                if (stack.lenght > 0) {
+                    if (prec(stack[stack.length - 1]) >= this.prec(item)) {
+                        postfixArr.push(stack.pop())
+                        stack.push(item)
+                    }
+                } else {
+                    stack.push(item)
+                }
+            }
+        }
+        while (stack.length > 0) {
+            postfixArr.push(stack.pop())
+        }
+        return postfixArr
+    }
 
-     infixToPostfix(s) {
- 
-        let st = []; //For stack operations, we are using C++ built in stack
-        let result = "";
- 
-        for(let i = 0; i < s.length; i++) {
-            let c = s[i];
- 
-            // If the scanned character is
-            // an operand, add it to output string.
-            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
-                result += c;
- 
-            // If the scanned character is an
-            // ‘(‘, push it to the stack.
-            else if(c == '(')
-                st.push('(');
- 
-            // If the scanned character is an ‘)’,
-            // pop and to output string from the stack
-            // until an ‘(‘ is encountered.
-            else if(c == ')') {
-                while(st[st.length - 1] != '(')
-                {
-                    result += st[st.length - 1];
-                    st.pop();
-                }
-                st.pop();
-            }
- 
-            //If an operator is scanned
-            else {
-                while(st.length != 0 && this.prec(s[i]) <= this.prec(st[st.length - 1])) {
-                    result += st[st.length - 1];
-                    st.pop();
-                }
-                st.push(c);
-            }
+    computePostfix(postfix) {
+        const operators = {
+            '+': (a, b) => a + b,
+            '-': (a, b) => a - b,
+            '*': (a, b) => a * b,
+            '/': (a, b) => a / b,
+            '%': (a, b) => a % b,
         }
- 
-        // Pop all the remaining elements from the stack
-        while(st.length != 0) {
-            result += st[st.length - 1];
-            st.pop();
-        }
-        
-        return result
+        let stack = []
+        postfix.forEach((item) => {
+            if (!this.isOperator(item)) {
+                stack.push(item)
+            } else {
+                console.log < (item)
+                let second = stack.pop()
+                let first = stack.pop()
+                stack.push(operators[item](+first, +second))
+            }
+        })
+        return stack.pop()
     }
 
     compute(event) {
-        let postfixEx = this.infixToPostfix(this.displayMessage)
-        console.log(postfixEx)
+        let arr = this.ParseToArray(this.displayMessage);
+        let postfixEx = this.infixToPostfix(arr)
+        let result = this.computePostfix(postfixEx)
+        this.displayMessage = String(result)
+        this.updateDisplay()
     }
 
     updateDisplay() {
@@ -108,12 +123,13 @@ class Calculator {
     }
 
 }
+
 let c = new Calculator()
 
-c.deleteBtn.addEventListener('click',(e)=>{
+c.deleteBtn.addEventListener('click', (e) => {
     c.delete(e)
 })
-c.equalBtn.addEventListener('click',(e)=>{
+c.equalBtn.addEventListener('click', (e) => {
     c.compute(e)
 })
 for (let i = 0; i < c.numberBtns.length; i++) {
