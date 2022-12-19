@@ -1,6 +1,9 @@
+// Author : Ehsan Espandar 
+// email : eespandar@gmail.com
+// Nickname : EEZeus
+// Calculator which can operate on any string including, +, -, *, /, %, and sqrt operations regarding to arithmetic precedense
+
 class Calculator {
-
-
     constructor() {
         this.displayMessage = ''
         this.display = document.querySelector('.result')
