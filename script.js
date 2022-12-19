@@ -24,7 +24,7 @@ class Calculator {
         let arr = []
         let str = ''
         for (let i = 0; i < displayMessage.length; i++) {
-            if (displayMessage[i] < '0' && displayMessage[i] != '.') {
+            if ((displayMessage[i] < '0' || displayMessage[i] == '\u221a') && displayMessage[i] != '.') {
                 if (str.length > 0)
                     arr.push(str)
                 arr.push(displayMessage[i])
@@ -39,7 +39,7 @@ class Calculator {
         return arr
     }
     prec(c) {
-        if (c == 'sqrt')
+        if (c == '\u221a')
             return 3;
         else if (c == '/' || c == '*' || c == '%')
             return 2;
@@ -52,7 +52,7 @@ class Calculator {
         if (op == '+' || op == '-' ||
             op == '%' || op == '*' ||
             op == '/' || op == '(' ||
-            op == ')' || op == 'sqrt') {
+            op == ')' || op == '\u221a') {
             return true;
         }
         else
@@ -72,15 +72,17 @@ class Calculator {
                 }
                 stack.pop()
             } else if (this.isOperator(item)) {
-                if (stack.lenght > 0) {
-                    if (prec(stack[stack.length - 1]) >= this.prec(item)) {
+                if (stack.length > 0) {
+                    console.log(item)
+                    while (this.prec(stack[stack.length - 1]) >= this.prec(item)) {
                         postfixArr.push(stack.pop())
-                        stack.push(item)
                     }
+                    stack.push(item)
                 } else {
                     stack.push(item)
                 }
             }
+            console.log(postfixArr, stack)
         }
         while (stack.length > 0) {
             postfixArr.push(stack.pop())
@@ -95,16 +97,22 @@ class Calculator {
             '*': (a, b) => a * b,
             '/': (a, b) => a / b,
             '%': (a, b) => a % b,
+            '\u221a': (a) => Math.sqrt(a)
         }
         let stack = []
         postfix.forEach((item) => {
             if (!this.isOperator(item)) {
                 stack.push(item)
             } else {
-                console.log < (item)
-                let second = stack.pop()
-                let first = stack.pop()
-                stack.push(operators[item](+first, +second))
+                if (item === '\u221a') {
+                    let first = stack.pop()
+                    stack.push(operators[item](+first))
+                } else {
+                    let second = stack.pop()
+                    let first = stack.pop()
+                    stack.push(operators[item](+first, +second))
+                }
+
             }
         })
         return stack.pop()
